@@ -28,3 +28,6 @@ dist/
 
 build-release.log
 _probe/
+
+_ghub-uninstall.log
+_adhoc-*.log

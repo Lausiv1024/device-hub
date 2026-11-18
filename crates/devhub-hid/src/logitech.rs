@@ -573,19 +573,21 @@ impl Logitech {
         }
         let mut b = [0u8; 11];
         b[0] = id as u8;
+        let scale = |c: u8| ((c as u16 * state.brightness.min(100) as u16) / 100) as u8;
         match id {
             0x00 => {}
             0x01 => {
-                // Static: color + ramp
-                b[1] = state.color.r;
-                b[2] = state.color.g;
-                b[3] = state.color.b;
+                // Static: 明るさは LED の色そのものをスケールして表現する
+                // (G502 HERO には 0x8040 BrightnessControl が無い)。
+                b[1] = scale(state.color.r);
+                b[2] = scale(state.color.g);
+                b[3] = scale(state.color.b);
             }
             0x02 => {
                 // Pulse: color + speed
-                b[1] = state.color.r;
-                b[2] = state.color.g;
-                b[3] = state.color.b;
+                b[1] = scale(state.color.r);
+                b[2] = scale(state.color.g);
+                b[3] = scale(state.color.b);
                 b[4] = state.speed;
             }
             0x0a => {
@@ -1121,6 +1123,12 @@ impl DeviceDriver for Logitech {
 
     fn read(&self) -> HubResult<DeviceState> {
         let mut st = self.lock();
+        // 本体のプロファイルボタンで切り替えられた場合も追従する。
+        if let Ok(sector) = st.io.get_active(self.feature.profile) {
+            if let Some(i) = self.headers.iter().position(|(s, _)| *s == sector) {
+                st.active = i;
+            }
+        }
         self.refresh_active(&mut st)?;
         let p = st.profiles[st.active].clone();
 
@@ -1257,8 +1265,8 @@ impl DeviceDriver for Logitech {
         let index = st.active.min(st.profiles.len().saturating_sub(1));
         let mut p = st.profiles[index].clone();
         p.rate_ms = 1;
-        p.default_index = 0;
-        p.shift_index = 1;
+        p.default_index = 1;
+        p.shift_index = 2;
         p.resolutions = [400, 800, 1600, 3200, 6400];
         p.color = Rgb::hex(0xffffff);
         p.angle_snap = 0;

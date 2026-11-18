@@ -50,6 +50,26 @@ fn main() {
     };
     let info = drv.info();
     println!("info: {} / fw={:?}", info.name, info.firmware);
+
+    if std::env::args().any(|a| a == "--reset") {
+        match drv.run_action("reset_profile", None) {
+            Ok(o) => println!("reset: {:?}", o.message),
+            Err(e) => println!("reset failed: {e}"),
+        }
+        std::thread::sleep(std::time::Duration::from_millis(300));
+        if let Ok(s) = drv.read() {
+            if let Some(m) = &s.mouse {
+                println!(
+                    "dpi: {:?} active={}",
+                    m.stages.iter().map(|s| (s.x, s.enabled)).collect::<Vec<_>>(),
+                    m.active_stage
+                );
+            }
+            println!("settings: {:?}", s.settings);
+        }
+        return;
+    }
+
     let caps = drv.caps();
     println!(
         "caps: mouse={} profiles={:?} lighting={} settings={}",
