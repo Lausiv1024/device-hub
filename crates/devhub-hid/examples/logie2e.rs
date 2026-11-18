@@ -70,6 +70,46 @@ fn main() {
         return;
     }
 
+    if let Some(pos) = std::env::args().position(|a| a == "--stress-dpi") {
+        let n: usize = std::env::args()
+            .nth(pos + 1)
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(30);
+        let mut stages = drv.read().unwrap().mouse.unwrap().stages;
+        let mut fails = 0usize;
+        let started = std::time::Instant::now();
+        for i in 0..n {
+            stages[0].x = 400 + ((i % 10) as u32) * 100;
+            let t = std::time::Instant::now();
+            match drv.apply(&Change::DpiStages {
+                stages: stages.clone(),
+                active: 1,
+            }) {
+                Ok(()) => {}
+                Err(e) => {
+                    fails += 1;
+                    println!("apply[{i}] FAIL after {:?}: {e}", t.elapsed());
+                }
+            }
+            let t = std::time::Instant::now();
+            if let Err(e) = drv.read() {
+                fails += 1;
+                println!("read[{i}] FAIL after {:?}: {e}", t.elapsed());
+            }
+            // UI で DPI スライダー操作の直後にステージを選ぶと、異なる
+            // Change が連続する (プロファイル書き込みが 2 回続く)。
+            if i % 2 == 0 {
+                let t = std::time::Instant::now();
+                if let Err(e) = drv.apply(&Change::ActiveStage(1)) {
+                    fails += 1;
+                    println!("stage[{i}] FAIL after {:?}: {e}", t.elapsed());
+                }
+            }
+        }
+        println!("stress-dpi: {n} iterations, {fails} failures, {:?}/iter", started.elapsed() / n as u32);
+        return;
+    }
+
     if std::env::args().any(|a| a == "--buttons") {
         let s = drv.read().unwrap();
         let m = s.mouse.clone().unwrap();

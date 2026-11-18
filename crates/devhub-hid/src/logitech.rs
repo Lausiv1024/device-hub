@@ -103,11 +103,12 @@ impl Io {
 
     fn request(&mut self, feature: u8, function: u8, params: &[u8]) -> HubResult<Vec<u8>> {
         let mut last = HubError::Protocol("HID++ timeout".into());
-        for _ in 0..3 {
+        for _ in 0..4 {
             match self.try_request(feature, function, params) {
                 Ok(v) => return Ok(v),
                 Err(HubError::Protocol(e)) if e.contains("timeout") => {
                     last = HubError::Protocol(e);
+                    std::thread::sleep(std::time::Duration::from_millis(20));
                     continue;
                 }
                 Err(e) => return Err(e),
@@ -149,7 +150,7 @@ impl Io {
         dev.write(&frame)
             .map_err(|e| HubError::Io(format!("hid write: {e}")))?;
 
-        let deadline = std::time::Instant::now() + std::time::Duration::from_millis(450);
+        let deadline = std::time::Instant::now() + std::time::Duration::from_millis(700);
         while std::time::Instant::now() < deadline {
             for dev in [&self.long, &self.short] {
                 let mut buf = [0u8; 32];
@@ -174,7 +175,9 @@ impl Io {
                 return Ok(buf[4..end].to_vec());
             }
         }
-        Err(HubError::Protocol("HID++ timeout".into()))
+        Err(HubError::Protocol(format!(
+            "HID++ timeout: feature={feature:02x} function={function}"
+        )))
     }
 
     fn drain(&mut self, ms: i32) {
@@ -727,7 +730,11 @@ fn write_sector(io: &mut Io, feature: u8, sector: u16, bytes: &[u8]) -> HubResul
         p[..chunk.len()].copy_from_slice(chunk);
         io.request(feature, 7, &p)?;
     }
-    io.send_only(feature, 8, &[])
+    io.send_only(feature, 8, &[])?;
+    // フラッシュへの確定は非同期。直後に setMode / setActive を送ると
+    // まれに取りこぼすので少し待つ (実機で確認した余裕)。
+    std::thread::sleep(std::time::Duration::from_millis(120));
+    Ok(())
 }
 
 fn adopt_host_state(io: &mut Io, feature: &FeatureMap, p: &mut Profile) {

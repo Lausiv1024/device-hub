@@ -61,6 +61,11 @@ fn 5 でセクタ 0 の先頭 64B を読むとプロファイル目次:
 `[sector(2B BE), enabled, 0]` × 5、終端 `ff ff 00 00`。
 実機は sector 1..5 が enabled=1。セクタ 0 が目次 (CRC あり)。
 
+> **書き込み後の待ち**: `writeEnd` (fn 8) の確定は非同期で、直後に
+> `setMode` / `setActive` を送るとまれに HID++ タイムアウトになる。
+> 実機では 120ms 待つと連続 DPI 変更 150 回でも失敗しない
+> (`logie2e --stress-dpi`)。
+
 ### プロファイル 256B レイアウト (実機ダンプ)
 
 ```text
