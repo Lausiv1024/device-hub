@@ -70,6 +70,50 @@ fn main() {
         return;
     }
 
+    if std::env::args().any(|a| a == "--buttons") {
+        let s = drv.read().unwrap();
+        let m = s.mouse.clone().unwrap();
+        for (i, b) in m.buttons.iter().enumerate() {
+            println!("button[{i}] {:?}", b);
+        }
+        // G7 (slot 6) を Ctrl+C に、G8 (slot 7) をプロファイル切替にして読み戻す。
+        for (slot, action) in [
+            (
+                6usize,
+                ButtonAction::Key(KeyStroke {
+                    mods: 0x01,
+                    usage: 0x06,
+                }),
+            ),
+            (7, ButtonAction::ProfileCycle),
+        ] {
+            match drv.apply(&Change::Button { slot, action }) {
+                Ok(()) => println!("wrote slot {slot}"),
+                Err(e) => println!("write slot {slot} failed: {e}"),
+            }
+        }
+        if let Ok(s) = drv.read() {
+            if let Some(m) = &s.mouse {
+                println!("after: slot6={:?} slot7={:?}", m.buttons[6], m.buttons[7]);
+            }
+        }
+        // 元に戻す (G7=DPI down, G8=DPI up)。
+        let _ = drv.apply(&Change::Button {
+            slot: 6,
+            action: ButtonAction::Dpi(DpiFn::Down),
+        });
+        let _ = drv.apply(&Change::Button {
+            slot: 7,
+            action: ButtonAction::Dpi(DpiFn::Up),
+        });
+        if let Ok(s) = drv.read() {
+            if let Some(m) = &s.mouse {
+                println!("restored: slot6={:?} slot7={:?}", m.buttons[6], m.buttons[7]);
+            }
+        }
+        return;
+    }
+
     let caps = drv.caps();
     println!(
         "caps: mouse={} profiles={:?} lighting={} settings={}",
