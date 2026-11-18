@@ -19,6 +19,7 @@ docs/AUDIO_FRONTEND.md  USB DAC (TP55 / WalkPlay) の EQ 画面と契約の使�
 docs/BACKEND_BRIEF.md   Web HUB 完全移植の機能表 (v3)
 docs/ADD_DEVICE.md      新デバイス追加の手順 (別セッション/別エージェント向け)
 docs/PROTOCOL_NOTES.md  Web configurator の解析結果 (コマンド表・アドレス・機能一覧)
+docs/LOGITECH_G502.md   G502 HERO / HID++ 2.0 の実機解析とオンボードプロファイル
 docs/FRONTEND.md        フロントエンドの構造
 ```
 

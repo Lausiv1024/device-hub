@@ -265,6 +265,23 @@ pub const KNOWN: &[KnownDevice] = &[
         driver: DriverKind::Lamzu,
         verified: false,
     },
+    // ---------------------------------------------------------------- マウス (Logitech HID++)
+    // G502 HERO 有線 — 実機列挙 046d:c08b。設定は if1 の HID++ 2.0
+    // (short=FF00/01, long=FF00/02)。オンボードプロファイル (0x8100) を直接書く。
+    // 実機検証済み (DPI 5 段・11 ボタン・2 ゾーン LED・125–1000Hz)。
+    KnownDevice {
+        vid: 0x046D,
+        pid: 0xC08B,
+        usage_page: Some(0xFF00),
+        usage: Some(0x01),
+        kind: DeviceKind::Mouse,
+        vendor: "Logitech",
+        model: "g502-hero",
+        name: "G502 HERO",
+        transport: Transport::Wired,
+        driver: DriverKind::Logitech,
+        verified: true,
+    },
 ];
 
 /// 列挙結果 (VID/PID/usage) に合う既知デバイス。`0xFFFF` のプレースホルダは一致しない。

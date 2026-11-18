@@ -14,6 +14,7 @@
 | HTS Plus Pro (無線) | ドングル 33E4:3854 | FF02 / 02 | Mousefit → `mousefit8.rs` (report-8/EEPROM) | www.mouse.fit | **v2 実機検証済** (全設定・DPI・ボタン・マクロ・ポーリング 125–8K・磁気ボタン校正/押下深さ・休眠検知/覚醒自動再読) |
 | HTS Plus Pro (有線) | 33E4:5219 | FF02 / 02 | Mousefit → `mousefit8.rs` (report-8/EEPROM) | www.mouse.fit | **v2 実機検証済** (有線でも feature report は使えず report-8) |
 | HTX Ultra | 33E4:5608, 5617, 5618, 5619 | FF02 / 02 (推定) | Mousefit | www.mouse.fit | 機種表から登録 / 未検証 |
+| G502 HERO | 046D:C08B | FF00 / 01 (+ FF00/02 の long report) | Logitech (`logitech.rs`) | 公式 G HUB 相当 | **実機検証済** (DPI 5 段・11 ボタン・2 ゾーン LED・125–1000Hz・オンボード保存) `docs/LOGITECH_G502.md` |
 | ATK F1 Ultimate | 未確定 | 未確定 | 未確定 | (mouse.fit の機種表に無い) | §7 を参照 |
 
 **接続方式でプロトコルが変わる点に注意**: mouse.fit の新プロトコル (64B feature report) は

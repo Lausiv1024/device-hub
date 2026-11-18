@@ -59,8 +59,14 @@ fn main() {
                 tb.title = Some("Device HUB".into());
             }
 
-            gpui_kit::open_window(options, cx, |window, cx| {
-                cx.new(|cx| Shell::new(window, cx))
+            // `--minimized` で起動時に最小化 (Windows のログオン起動用)。
+            let start_minimized = std::env::args().any(|a| a == "--minimized");
+            gpui_kit::open_window(options, cx, move |window, cx| {
+                let shell = cx.new(|cx| Shell::new(window, cx));
+                if start_minimized {
+                    window.minimize_window();
+                }
+                shell
             })
             .expect("failed to open window");
             cx.on_window_closed(|cx, _| {

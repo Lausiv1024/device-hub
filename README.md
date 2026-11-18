@@ -35,6 +35,7 @@ with a Liquid Glass design.
 | HTS Plus Pro (wired + 2.4GHz dongle) | All settings incl. Rapid Trigger |
 | SU66 Max (Keebforce/Everglide) | Keymap, per-key perf, lighting, macros, live travel |
 | TP55 USB DAC | Parametric EQ |
+| G502 HERO (046d:c08b) | Replaces G HUB: 5 DPI stages, 11 buttons, 2 RGB zones, 125-1000 Hz, all stored in onboard profiles (see `docs/LOGITECH_G502.md`) |
 
 Other models using the same protocols (mouse.fit report-8/EEPROM, xsyd) are
 detected automatically by capability, not by device name.
@@ -55,6 +56,21 @@ cargo test --workspace
 
 `device-hub.exe` is a single portable binary — fonts and the icon are embedded;
 settings live in `%APPDATA%\DeviceHub\`.
+
+### Replacing Logitech G HUB (G502 HERO)
+
+The G502 HERO driver writes the onboard profile (0x8100) directly, so the
+mouse keeps its DPI / buttons / lighting without G HUB running.
+
+```powershell
+cargo build --release -p device-hub
+powershell -ExecutionPolicy Bypass -File scripts\install-autostart.ps1
+# Administrator: stop/uninstall G HUB and register autostart
+powershell -ExecutionPolicy Bypass -File scripts\replace-ghub.ps1
+```
+
+Protocol notes and the full onboard-profile layout: `docs/LOGITECH_G502.md`.
+Autostart can be removed with `scripts\install-autostart.ps1 -Uninstall`.
 
 ### OBS plugin
 

@@ -72,6 +72,8 @@ pub enum DriverKind {
     Atk,
     /// www.lamzu.net / Aurora 系 (64B feature report、if2 FFFF:00)。
     Lamzu,
+    /// Logitech HID++ 2.0 (G502 HERO 等)。オンボードプロファイル 0x8100 を直接書く。
+    Logitech,
     /// 未割り当て (検出だけできる)。
     Unsupported,
 }
